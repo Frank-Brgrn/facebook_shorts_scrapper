@@ -11,3 +11,4 @@ _transcript_test/
 _backfill_dates.log
 html dumps/
 fb_reels_page.html
+_setup_env/*.whl

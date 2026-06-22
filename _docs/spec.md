@@ -1,5 +1,7 @@
 # Facebook Reels Importer — Project Spec
 
+> User-facing guide: see [README.md](../README.md) in the project root for setup, workflow, and batch file reference.
+
 ## Overview
 
 The objective is to import all videos saved on Facebook and archive them in CSV and Obsidian.
@@ -7,6 +9,19 @@ The objective is to import all videos saved on Facebook and archive them in CSV 
 The workflow always starts from a saved HTML dump of the Facebook Saved Reels page, stored in the `html dumps` folder. There is no live page scraping.
 
 For new videos only, Chrome runs in the background to try to fetch each video's publish date from Facebook.
+
+## Batch files
+
+See [README.md](../README.md#batch-files-reference) for the full table. Summary:
+
+| Script | Role |
+|--------|------|
+| `run_scraper.bat` | HTML dump → CSV + new Obsidian notes (+ publish dates for new videos) |
+| `run_transcribe.bat` | Whisper transcription into Obsidian `# Transcript` |
+| `run_backfill_dates.bat` | Backfill missing `Published Date` in existing notes |
+| `_setup_env/ADMIN_Install_Env.bat` | Create conda env, install deps + ffmpeg |
+| `_setup_env/ADMIN_Install_Requirements.bat` | Upgrade packages from `requirements.txt` |
+| `_setup_env/ADMIN_Remove_Env.bat` | Remove conda env |
 
 ## Setup
 

@@ -19,6 +19,9 @@ call python -m pip cache purge
 
 call python -m pip install -r requirements.txt
 
+REM ffmpeg is required for audio transcription (yt-dlp / faster-whisper)
+call conda install ffmpeg -y -c conda-forge
+
 REM If the above fails, try with --user flag
 if errorlevel 1 (
     echo Trying with --user flag...
