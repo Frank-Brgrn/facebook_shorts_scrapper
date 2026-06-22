@@ -1,0 +1,7 @@
+pandas
+playwright
+python-dotenv
+jinja2
+python-frontmatter
+yt-dlp
+faster-whisper

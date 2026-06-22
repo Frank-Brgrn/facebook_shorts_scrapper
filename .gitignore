@@ -1,0 +1,13 @@
+.env
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+scrapped files/*.csv
+chrome_profile/
+chrome_automation/
+_transcript_work/
+_transcript_test/
+_backfill_dates.log
+html dumps/
+fb_reels_page.html
