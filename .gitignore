@@ -10,5 +10,6 @@ _transcript_work/
 _transcript_test/
 _backfill_dates.log
 html dumps/
+html dumps/**.html
 fb_reels_page.html
 _setup_env/*.whl

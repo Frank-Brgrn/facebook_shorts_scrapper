@@ -5,7 +5,6 @@ import time
 from datetime import date
 
 from src.browser import ChromeSession
-from src.chrome_utils import ensure_chrome_closed
 from src.config import Settings
 from src.models import VideoRecord
 from src.utils import parse_publish_date
@@ -45,7 +44,6 @@ EXTRACT_PUBLISH_DATE_SCRIPT = """
 class PublishDateFetcher:
     def __init__(self, settings: Settings) -> None:
         self.settings = settings
-        ensure_chrome_closed()
         self.session = ChromeSession.open(settings)
 
     def close(self) -> None:
@@ -57,7 +55,6 @@ class PublishDateFetcher:
             self.session.disconnect()
         except Exception:
             pass
-        ensure_chrome_closed()
         self.session = ChromeSession.open(self.settings)
 
     @staticmethod

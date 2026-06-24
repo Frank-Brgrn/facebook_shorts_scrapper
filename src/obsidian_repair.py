@@ -9,9 +9,9 @@ from pathlib import Path
 import frontmatter
 
 from src.config import get_settings
-from src.models import CSV_COLUMNS
+from src.models import OBSIDIAN_FRONTMATTER_KEYS
 
-FRONTMATTER_KEYS = list(CSV_COLUMNS)
+FRONTMATTER_KEYS = list(OBSIDIAN_FRONTMATTER_KEYS)
 
 
 def _clean_field_value(raw: str) -> str:

@@ -22,8 +22,30 @@ CSV_COLUMNS = [
     "Tags",
     "Status",
     "Is Useful",
-    "Rating",
     "Is Transcribed",
+    "Is AI Analyzed",
+    "Rating",
+]
+
+OBSIDIAN_FRONTMATTER_KEYS = [
+    "Accessed Date",
+    "Published Date",
+    "Author",
+    "Channel",
+    "Title",
+    "URL",
+    "Embed URL",
+    "Source",
+    "Type",
+    "Video ID",
+    "Summary",
+    "Topic",
+    "Tags",
+    "Status",
+    "Is Useful",
+    "Is Transcribed",
+    "Is AI Analyzed",
+    "Rating",
 ]
 
 
@@ -45,8 +67,9 @@ class VideoRecord:
     tags: str = ""
     status: str = ""
     is_useful: str = ""
-    rating: str = ""
     is_transcribed: str = ""
+    is_ai_analyzed: str = ""
+    rating: str = ""
     transcript: str = ""
 
     def to_csv_row(self) -> dict[str, Any]:
@@ -67,8 +90,9 @@ class VideoRecord:
             "Tags": self.tags,
             "Status": self.status,
             "Is Useful": self.is_useful,
-            "Rating": self.rating,
             "Is Transcribed": self.is_transcribed,
+            "Is AI Analyzed": self.is_ai_analyzed,
+            "Rating": self.rating,
         }
 
     def to_template_context(self) -> dict[str, Any]:
@@ -86,8 +110,9 @@ class VideoRecord:
             "Tags",
             "Status",
             "Is Useful",
-            "Rating",
             "Is Transcribed",
+            "Is AI Analyzed",
+            "Rating",
         ):
             context[key] = _safe(context.get(key, ""))
         context["Transcript"] = self.transcript

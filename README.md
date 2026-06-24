@@ -84,10 +84,12 @@ run_scraper.bat
 ### Step 3 — Transcribe notes (optional)
 
 ```bat
+run_transcribe.bat 10
 run_transcribe.bat
+run_transcribe.bat --limit 10
 ```
 
-Processes all Obsidian notes that have an empty `# Transcript` section and sets `Is Transcribed: 1` when done. Downloaded audio is deleted after each successful note.
+Processes pending Obsidian notes only. Notes that already have `Is Transcribed: 1` **and** transcript text are skipped. Downloaded audio is deleted after each successful note.
 
 ### Step 4 — Backfill missing publish dates (optional)
 
@@ -106,7 +108,7 @@ All workflow scripts activate conda env `facebook_shorts_scrapper` and forward e
 | File | Purpose |
 |------|---------|
 | **`run_scraper.bat`** | Import reels from the newest HTML dump (or `--html-file`). Exports CSV + new Obsidian notes. Fetches publish dates for new videos unless `--no-fetch-dates` is passed. |
-| **`run_transcribe.bat`** | Transcribe Obsidian notes missing a transcript. Default: all pending notes. Examples: `--limit 5`, `--url "https://www.facebook.com/watch/?v=..."`. |
+| **`run_transcribe.bat`** | Transcribe pending Obsidian notes. Pass a number: `run_transcribe.bat 10` (or `--limit 10`). Omit the number to process all pending. Skips notes already transcribed. |
 | **`run_backfill_dates.bat`** | Fill missing `Published Date` in Obsidian frontmatter via Chrome. Examples: `--dry-run`, `--limit 5`. |
 
 ### Setup scripts (`_setup_env/`)

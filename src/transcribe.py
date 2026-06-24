@@ -167,8 +167,9 @@ def _record_from_csv_row(row: dict[str, str], *, transcript: str = "") -> VideoR
         tags=(row.get("Tags") or "").strip(),
         status=(row.get("Status") or "").strip(),
         is_useful=(row.get("Is Useful") or "").strip(),
-        rating=(row.get("Rating") or "").strip(),
         is_transcribed="1" if transcript else "",
+        is_ai_analyzed=(row.get("Is AI Analyzed") or "").strip(),
+        rating=(row.get("Rating") or "").strip(),
         transcript=transcript,
     )
 
@@ -249,6 +250,12 @@ def repair_corrupted_obsidian_notes(vault_dir: Path) -> int:
         repaired += 1
         print(f"Repaired: {path.name}", flush=True)
     return repaired
+
+
+def count_transcribed_notes(vault_dir: Path) -> int:
+    if not vault_dir.exists():
+        return 0
+    return sum(1 for path in vault_dir.glob("*.md") if _note_is_transcribed(path))
 
 
 def list_pending_obsidian_notes(vault_dir: Path) -> tuple[list[PendingNote], list[PendingNote]]:
@@ -412,13 +419,20 @@ def run_obsidian_batch(
     limit: int | None,
 ) -> int:
     to_transcribe, to_mark = list_pending_obsidian_notes(vault_dir)
+    pending_total = len(to_transcribe)
+    already_done = count_transcribed_notes(vault_dir)
 
     if limit is not None:
+        if limit < 1:
+            raise ValueError("Count must be at least 1")
         to_transcribe = to_transcribe[:limit]
 
     print(f"Obsidian vault: {vault_dir}", flush=True)
-    print(f"Notes to mark as transcribed (already have text): {len(to_mark)}", flush=True)
-    print(f"Notes to transcribe: {len(to_transcribe)}", flush=True)
+    print(f"Already transcribed (skipped): {already_done}", flush=True)
+    print(f"Pending transcription: {pending_total}", flush=True)
+    print(f"Processing this run: {len(to_transcribe)}", flush=True)
+    if to_mark:
+        print(f"Notes with transcript text to flag only: {len(to_mark)}", flush=True)
 
     removed = cleanup_transcribed_audio(vault_dir, work_dir)
     if removed:
@@ -482,7 +496,14 @@ def main() -> int:
         "--limit",
         type=int,
         default=None,
-        help="Max number of notes/URLs to process",
+        help="Max number of pending notes to transcribe (same as COUNT)",
+    )
+    parser.add_argument(
+        "count",
+        nargs="?",
+        type=int,
+        metavar="COUNT",
+        help="Number of pending notes to transcribe (default: all pending)",
     )
     parser.add_argument(
         "--model",
@@ -522,6 +543,11 @@ def main() -> int:
     )
     args = parser.parse_args()
 
+    if args.limit is not None and args.count is not None:
+        parser.error("Use either COUNT or --limit, not both")
+
+    note_limit = args.limit if args.limit is not None else args.count
+
     if args.repair_corrupted:
         repaired = repair_corrupted_obsidian_notes(settings.obsidian_vault_dir)
         print(f"Repaired {repaired} note(s).", flush=True)
@@ -533,14 +559,18 @@ def main() -> int:
         return 0
 
     if args.obsidian or not any([args.url, args.video_id, args.csv]):
-        return run_obsidian_batch(
-            vault_dir=settings.obsidian_vault_dir,
-            work_dir=args.work_dir,
-            model_name=args.model,
-            language=args.language,
-            cookies_browser=args.cookies_browser,
-            limit=args.limit,
-        )
+        try:
+            return run_obsidian_batch(
+                vault_dir=settings.obsidian_vault_dir,
+                work_dir=args.work_dir,
+                model_name=args.model,
+                language=args.language,
+                cookies_browser=args.cookies_browser,
+                limit=note_limit,
+            )
+        except ValueError as exc:
+            print(f"Error: {exc}", flush=True)
+            return 1
 
     urls: list[str] = []
     if args.url:
@@ -552,7 +582,7 @@ def main() -> int:
         if not csv_path.exists():
             print(f"CSV not found: {csv_path}", flush=True)
             return 1
-        urls = load_urls_from_csv(csv_path, limit=args.limit)
+        urls = load_urls_from_csv(csv_path, limit=note_limit)
 
     transcriber = BatchTranscriber(
         model_name=args.model,

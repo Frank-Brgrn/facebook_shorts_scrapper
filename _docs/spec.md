@@ -145,7 +145,7 @@ If two different videos share the same title, the second file gets a `(2)` suffi
 
 ### 6. Obsidian note format
 
-**Frontmatter:** Same fields as the CSV columns, plus `Is Transcribed`.
+**Frontmatter:** Matches `template_video_facebook_reels.md` in your vault (`Is Transcribed`, `Is AI Analyzed`; no `Extraction Type` in notes — that field is CSV-only).
 
 - All values are written as quoted JSON strings (valid YAML for Obsidian properties).
 - Titles and text fields are collapsed to a single line (no line breaks in frontmatter).
@@ -165,18 +165,18 @@ Embed URL: "https://www.facebook.com/watch/?ref=saved&v=1443970823862051"
 Source: "Facebook Reel"
 Type: "Short Video"
 Video ID: "1443970823862051"
-Extraction Type: "Facebook Shorts Scraper"
 Summary: ""
 Topic: ""
 Tags: ""
 Status: ""
 Is Useful: ""
-Rating: ""
 Is Transcribed: ""
+Is AI Analyzed: ""
+Rating: ""
 ---
 <iframe ...></iframe>
 
-# Notes
+# My Notes
 
 ## 🧠 Key Ideas
 -
@@ -187,19 +187,34 @@ Is Transcribed: ""
 ## 📝 Detailed Notes
 -
 
-## 🧪 Action Items / Experiments
+## 🧪 Action Items / Experiments that I should Initiate
 -
 
 ## 🔁 Links & Resources
 -
 
 ---
+# AI Analysis
 
+## 🧠 Key Ideas
+-
+
+## 💬 Quotes Worth Keeping
+-
+
+## 📝 Notes
+-
+
+## 🧪 Action Items / Experiments that I should Initiate
+-
+
+## 🔁 Links & Resources
+-
+
+---
 # Transcript
 
 ---
-
-# AI (Link files)
 ```
 
 **Vault folder:**  

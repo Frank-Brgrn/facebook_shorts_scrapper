@@ -103,27 +103,64 @@ def detect_last_used_profile(user_data_dir: Path) -> str:
     return "Default"
 
 
-def wait_for_cdp_port(port: int, timeout: float = 60) -> None:
+def is_cdp_port_ready(port: int) -> bool:
     url = f"http://127.0.0.1:{port}/json/version"
+    try:
+        with urllib.request.urlopen(url, timeout=2) as response:
+            return response.status == 200
+    except (urllib.error.URLError, TimeoutError, OSError):
+        return False
+
+
+def wait_for_cdp_port(port: int, timeout: float = 60) -> None:
     deadline = time.time() + timeout
     while time.time() < deadline:
-        try:
-            with urllib.request.urlopen(url, timeout=2) as response:
-                if response.status == 200:
-                    return
-        except (urllib.error.URLError, TimeoutError, OSError):
-            time.sleep(0.5)
+        if is_cdp_port_ready(port):
+            return
+        time.sleep(0.5)
     raise TimeoutError(f"Chrome debug port {port} did not become ready in {timeout:.0f}s")
 
 
-def is_chrome_running() -> bool:
+def find_listening_pid(port: int) -> int | None:
     result = subprocess.run(
-        ["tasklist", "/FI", "IMAGENAME eq chrome.exe"],
+        ["netstat", "-ano", "-p", "tcp"],
         capture_output=True,
         text=True,
         check=False,
     )
-    return "chrome.exe" in result.stdout.lower()
+    suffix = f":{port}"
+    for line in result.stdout.splitlines():
+        if "LISTENING" not in line:
+            continue
+        parts = line.split()
+        if len(parts) < 5:
+            continue
+        if not parts[1].endswith(suffix):
+            continue
+        try:
+            return int(parts[-1])
+        except ValueError:
+            continue
+    return None
+
+
+def terminate_process_tree(pid: int) -> None:
+    if pid <= 0:
+        return
+    subprocess.run(
+        ["taskkill", "/PID", str(pid), "/F", "/T"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+
+def release_debug_port(port: int) -> None:
+    """Stop a stale automation Chrome instance blocking the debug port."""
+    pid = find_listening_pid(port)
+    if pid is not None:
+        terminate_process_tree(pid)
+        time.sleep(1)
 
 
 def clear_chrome_lock_files(user_data_dir: Path) -> None:
@@ -136,25 +173,18 @@ def clear_chrome_lock_files(user_data_dir: Path) -> None:
                 pass
 
 
-def close_chrome() -> None:
-    if not is_chrome_running():
-        return
-    subprocess.run(
-        ["taskkill", "/IM", "chrome.exe", "/F", "/T"],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    deadline = time.time() + 20
-    while time.time() < deadline:
-        if not is_chrome_running():
-            break
-        time.sleep(0.5)
-    clear_chrome_lock_files(default_chrome_user_data_dir())
-    time.sleep(1)
-
-
-def ensure_chrome_closed() -> None:
-    if is_chrome_running():
-        print("Closing Chrome so automation can use your profile...", flush=True)
-        close_chrome()
+def close_automation_chrome(
+    chrome_process: subprocess.Popen | None,
+    *,
+    user_data_dir: Path | None = None,
+) -> None:
+    """Stop only the automation Chrome process launched by this project."""
+    if chrome_process is not None and chrome_process.poll() is None:
+        terminate_process_tree(chrome_process.pid)
+        deadline = time.time() + 20
+        while time.time() < deadline:
+            if chrome_process.poll() is not None:
+                break
+            time.sleep(0.5)
+    if user_data_dir is not None:
+        clear_chrome_lock_files(user_data_dir)

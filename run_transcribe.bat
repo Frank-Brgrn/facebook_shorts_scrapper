@@ -4,11 +4,16 @@ cd /d "%~dp0"
 
 echo Facebook Reels Transcriber
 echo.
-echo Transcribe all Obsidian notes missing a transcript:
+echo Notes with Is Transcribed: 1 and a transcript are always skipped.
+echo.
+echo Transcribe 10 pending notes:
+echo   run_transcribe.bat 10
+echo.
+echo Transcribe all pending notes:
 echo   run_transcribe.bat
 echo.
-echo Test on first 5 notes only:
-echo   run_transcribe.bat --limit 5
+echo Same with --limit:
+echo   run_transcribe.bat --limit 10
 echo.
 echo Single URL:
 echo   run_transcribe.bat --url "https://www.facebook.com/watch/?v=1443970823862051"
